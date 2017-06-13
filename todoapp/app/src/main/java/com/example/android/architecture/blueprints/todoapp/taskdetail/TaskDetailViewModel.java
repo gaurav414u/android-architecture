@@ -41,11 +41,6 @@ public class TaskDetailViewModel extends TaskViewModel {
         mTaskDetailNavigator = taskDetailNavigator;
     }
 
-    public void onActivityDestroyed() {
-        // Clear references to avoid potential memory leaks.
-        mTaskDetailNavigator = null;
-    }
-
     /**
      * Can be called by the Data Binding Library or the delete menu item.
      */
