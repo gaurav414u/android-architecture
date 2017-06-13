@@ -19,24 +19,28 @@ package com.example.android.architecture.blueprints.todoapp.taskdetail;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 import com.example.android.architecture.blueprints.todoapp.Injection;
+import com.example.android.architecture.blueprints.todoapp.NavigatingActivity;
 import com.example.android.architecture.blueprints.todoapp.R;
 import com.example.android.architecture.blueprints.todoapp.ViewModelHolder;
 import com.example.android.architecture.blueprints.todoapp.addedittask.AddEditTaskActivity;
 import com.example.android.architecture.blueprints.todoapp.addedittask.AddEditTaskFragment;
+import com.example.android.architecture.blueprints.todoapp.data.Task;
 import com.example.android.architecture.blueprints.todoapp.util.ActivityUtils;
 
+import static android.app.Activity.RESULT_FIRST_USER;
 import static com.example.android.architecture.blueprints.todoapp.addedittask.AddEditTaskActivity.ADD_EDIT_RESULT_OK;
 import static com.example.android.architecture.blueprints.todoapp.taskdetail.TaskDetailFragment.REQUEST_EDIT_TASK;
 
 /**
  * Displays task details screen.
  */
-public class TaskDetailActivity extends AppCompatActivity implements TaskDetailNavigator {
+public class TaskDetailActivity extends NavigatingActivity<TaskDetailNavigatorImpl> {
 
     public static final String EXTRA_TASK_ID = "TASK_ID";
 
@@ -59,16 +63,10 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskDetailN
         TaskDetailFragment taskDetailFragment = findOrCreateViewFragment();
 
         mTaskViewModel = findOrCreateViewModel();
-        mTaskViewModel.setNavigator(this);
+        mTaskViewModel.setNavigator(getNavigator());
 
         // Link View and ViewModel
         taskDetailFragment.setViewModel(mTaskViewModel);
-    }
-
-    @Override
-    protected void onDestroy() {
-        mTaskViewModel.onActivityDestroyed();
-        super.onDestroy();
     }
 
     @NonNull
@@ -142,17 +140,13 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskDetailN
     }
 
     @Override
-    public void onTaskDeleted() {
-        setResult(DELETE_RESULT_OK);
-        // If the task was deleted successfully, go back to the list.
-        finish();
+    public TaskDetailNavigatorImpl initNavigator() {
+        return new TaskDetailNavigatorImpl(this);
     }
 
     @Override
-    public void onStartEditTask() {
-        String taskId = getIntent().getStringExtra(EXTRA_TASK_ID);
-        Intent intent = new Intent(this, AddEditTaskActivity.class);
-        intent.putExtra(AddEditTaskFragment.ARGUMENT_EDIT_TASK_ID, taskId);
-        startActivityForResult(intent, REQUEST_EDIT_TASK);
+    public void setNavigator(@Nullable TaskDetailNavigatorImpl navigator) {
+        super.setNavigator(navigator);
+        mTaskViewModel.setNavigator(navigator);
     }
 }
